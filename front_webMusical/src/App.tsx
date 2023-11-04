@@ -3,15 +3,52 @@ import { useRef, useState } from 'react';
 function App() {
   const [idea, setIdea] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement | null>(null); // Tipo explícito del ref
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
 
   const handleStartComposition = () => {
     if (textareaRef.current) {
       const ideaValue = textareaRef.current.value;
-      console.log('Valor del textarea:', ideaValue);
+      const jsonData = {
+        prompt: ideaValue,
+      };
+
+      // Realizar una solicitud POST a la dirección deseada
+      fetch('http://localhost:3000/stable-diffusion-integration', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(jsonData),
+      })
+        .then((response) => {
+          if (response.ok) {
+            return response.blob(); // Obtener los datos binarios (imagen)
+          } else {
+            throw new Error('La solicitud no se pudo completar con éxito.');
+          }
+        })
+        .then((imageData) => {
+          // `imageData` contiene los datos binarios de la imagen
+          const imageUrl = URL.createObjectURL(imageData);
+
+          // Establecer la URL de la imagen en el estado
+          setImageUrl(imageUrl);
+
+          console.log('Imagen del servidor:', imageUrl);
+          // Luego puedes usar `imageUrl` para mostrar la imagen en tu aplicación
+        })
+        .catch((error) => {
+          console.error('Error en la solicitud:', error);
+        });
     } else {
       console.log('El ref del textarea es nulo.');
     }
   };
+
+
+
+
 
   return (
     <div className="bg-gray-900 min-h-screen text-white flex items-center justify-center">
@@ -44,6 +81,18 @@ function App() {
             Espacio Imagen
           </div>
         </div>
+
+        <div className="mt-4">
+          <div className="bg-gray-700 h-32 rounded-md mt-4 image-container">
+            <img
+              src={imageUrl || ''}
+              alt="Imagen del servidor"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+
+
       </div>
     </div>
   );

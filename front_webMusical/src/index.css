@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.image-container {
+    width: 100%; /* Ajusta el ancho del contenedor al 100% del contenedor padre */
+    height: 300px; /* Define la altura deseada para el contenedor */
+    overflow: hidden; /* Oculta el contenido que desborde el contenedor */
+  }
