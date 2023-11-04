@@ -23,6 +23,7 @@ export class MusicGenController {
       });
 
     // Devuelve el enlace al archivo .wav como parte de la respuesta JSON
+    console.log(output)
     return { melodyUrl: output };
   }
 }

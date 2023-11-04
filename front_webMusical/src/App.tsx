@@ -20,25 +20,25 @@ function App() {
 
       //GENERAR MELODIA
       fetch(`http://localhost:3000/music/generate?prompt=${genreInput.value} ${melodyValue}`)
-      .then((response) => {
-        if (response.ok) {
-          return response.json(); // Parsea la respuesta JSON
-        } else {
-          throw new Error('La solicitud no se pudo completar con éxito.');
-        }
-      })
-      .then((responseJson) => {
-        // `responseJson` debería contener el enlace al archivo .wav (por ejemplo, `responseJson.melodyUrl`)
-        const melodyUrl = responseJson.melodyUrl;
-        console.log(melodyUrl);
-  
-        // Aquí puedes abrir o reproducir el enlace, como se mencionó anteriormente
-        setMelodyUrl(melodyUrl);
-        window.open(melodyUrl, '_blank'); // Esto abrirá el enlace en una nueva pestaña
-      })
-      .catch((error) => {
-        console.error('Error en la solicitud:', error);
-      });
+        .then((response) => {
+          if (response.ok) {
+            return response.json(); // Parsea la respuesta JSON
+          } else {
+            throw new Error('La solicitud no se pudo completar con éxito.');
+          }
+        })
+        .then((responseJson) => {
+          // `responseJson` debería contener el enlace al archivo .wav (por ejemplo, `responseJson.melodyUrl`)
+          const melodyUrl = responseJson.melodyUrl;
+          console.log(melodyUrl);
+
+          // Aquí puedes abrir o reproducir el enlace, como se mencionó anteriormente
+          setMelodyUrl(melodyUrl);
+
+        })
+        .catch((error) => {
+          console.error('Error en la solicitud:', error);
+        });
 
       //GENERAR LETRA
       const genreValue = genreInput.value;
@@ -140,33 +140,38 @@ function App() {
           Compose song
         </button>
 
-        {/* Agrega un campo de texto para mostrar la canción generada */}
-        <div className="mt-4">
-          <label htmlFor="composedSong" className="block text-sm font-medium text-gray-400">
-            Composed Song:
-          </label>
-          <textarea
-            id="composedSong"
-            name="composedSong"
-            rows={6} // Ajusta la cantidad de filas según tu preferencia
-            className="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 mt-1"
-            value={composedSong} // Muestra la canción generada
-            readOnly // Hace que el campo sea de solo lectura
-          />
-        </div>
+        {composedSong && (
+          /* Agrega un campo de texto para mostrar la canción generada */
+          <div className="mt-4">
+            <label htmlFor="composedSong" className="block text-sm font-medium text-gray-400">
+              Composed Song:
+            </label>
+            <textarea
+              id="composedSong"
+              name="composedSong"
+              rows={6} // Ajusta la cantidad de filas según tu preferencia
+              className="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 mt-1"
+              value={composedSong} // Muestra la canción generada
+              readOnly // Hace que el campo sea de solo lectura
+            />
+          </div>)}
 
-        <div>
-      {/* Resto de tu JSX */}
-      {melodyUrl && (
-        
-        <audio controls>
-          <source src={melodyUrl} type="audio/wav" />
-          Your browser does not support the audio element.
-        </audio>
-      )}
-    </div>
+        {melodyUrl && (
+          <div className="mt-4">
+            <label htmlFor="melodyComposed" className="block text-sm font-medium text-gray-400">
+              Melody:
+            </label>
 
-        
+            <br></br>
+            <audio controls>
+              <source src={melodyUrl} type="audio/wav" />
+              Your browser does not support the audio element.
+            </audio>
+
+          </div>)}
+
+
+
 
       </div>
     </div>
