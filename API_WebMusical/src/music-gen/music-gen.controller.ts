@@ -1,12 +1,15 @@
 // music.controller.ts
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import Replicate from 'replicate';
-
 
 @Controller('music')
 export class MusicGenController {
   @Get('generate')
-  async generateMusic() {
+  async generateMusic(@Query('prompt') prompt: string) {
+    if (!prompt) {
+      return "La solicitud debe incluir un valor para 'prompt'.";
+    }
+
     const replicate = new Replicate({
       auth: process.env.REPLICATE_API_TOKEN,
     });
@@ -16,7 +19,7 @@ export class MusicGenController {
       {
         input: {
           model_version: "melody",
-          prompt: "Soft drums" // Proporciona tu descripción aquí
+          prompt: prompt // Usamos el valor del 'prompt' proporcionado en la solicitud
         }
       });
 

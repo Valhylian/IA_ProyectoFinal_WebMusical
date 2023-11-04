@@ -10,6 +10,7 @@ export class ChatGptAiController {
 
     @Post("/mesagge")
     getModelAnswer(@Body() data:GetAiModelAnswer){
+        console.log(data.question)
         return this.service.getModelAnswer(data.question)
     }
 }
