@@ -26,7 +26,7 @@ function App() {
           if (response.ok) {
             return response.json(); // Parsea la respuesta JSON
           } else {
-            throw new Error('La solicitud no se pudo completar con éxito.');
+            throw new Error('La solicitud no se pudo completar con éxito Musica.');
           }
         })
         .then((responseJson) => {
@@ -199,6 +199,8 @@ function App() {
           ></textarea>
         </div>
 
+
+
         <button
           className="bg-blue-500 text-white font-medium py-2 px-4 rounded-md mt-4 hover-bg-blue-600"
           onClick={handleStartComposition}
@@ -206,6 +208,9 @@ function App() {
           Compose song
         </button>
 
+        <label htmlFor="message" className="block text-sm font-medium text-gray-400">
+          The generation of the melody and images may take a few minutes, please be patient:
+        </label>
         {composedSong && (
           /* Agrega un campo de texto para mostrar la canción generada */
           <div className="mt-4">
@@ -215,12 +220,24 @@ function App() {
             <textarea
               id="composedSong"
               name="composedSong"
-              rows={6} // Ajusta la cantidad de filas según tu preferencia
+              rows={8} // Ajusta la cantidad de filas según tu preferencia
               className="w-full bg-gray-700 text-gray-200 border border-gray-600 rounded-md py-2 px-3 mt-1"
               value={composedSong} // Muestra la canción generada
               readOnly // Hace que el campo sea de solo lectura
             />
           </div>)}
+
+
+
+        {imageUrl && (
+          <div className="mt-4">
+            <label htmlFor="image" className="block text-sm font-medium text-gray-400">
+              Image:
+            </label>
+            <br></br>
+            <img src={imageUrl} alt="Image" />
+          </div>
+        )}
 
         {melodyUrl && (
           <div className="mt-4">
@@ -235,16 +252,6 @@ function App() {
             </audio>
 
           </div>)}
-
-        {imageUrl && (
-          <div className="mt-4">
-            <label htmlFor="image" className="block text-sm font-medium text-gray-400">
-              Image:
-            </label>
-            <br></br>
-            <img src={imageUrl} alt="Image" />
-          </div>
-        )}
 
 
 
