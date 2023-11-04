@@ -4,12 +4,14 @@ function App() {
   const [idea, setIdea] = useState('');
   const [genero, setGenero] = useState('');
   const [melody, setMelody] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [melodyUrl, setMelodyUrl] = useState('');
   const [composedSong, setComposedSong] = useState(''); // Estado para mostrar la canción generada
 
   const ideaTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const genreInputRef = useRef<HTMLInputElement | null>(null);
   const melodyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
 
   const handleStartComposition = () => {
     const genreInput = document.getElementById('genero') as HTMLInputElement;
@@ -18,7 +20,7 @@ function App() {
       const ideaValue = ideaTextareaRef.current.value;
       const melodyValue = melodyTextareaRef.current.value;
 
-      //GENERAR MELODIA
+      //GENERAR MELODIA----------------------------------------------------------------
       fetch(`http://localhost:3000/music/generate?prompt=${genreInput.value} ${melodyValue}`)
         .then((response) => {
           if (response.ok) {
@@ -28,19 +30,17 @@ function App() {
           }
         })
         .then((responseJson) => {
-          // `responseJson` debería contener el enlace al archivo .wav (por ejemplo, `responseJson.melodyUrl`)
+          // `responseJson` debería contener el enlace al archivo .wav 
           const melodyUrl = responseJson.melodyUrl;
           console.log(melodyUrl);
 
-          // Aquí puedes abrir o reproducir el enlace, como se mencionó anteriormente
           setMelodyUrl(melodyUrl);
-
         })
         .catch((error) => {
           console.error('Error en la solicitud:', error);
         });
 
-      //GENERAR LETRA
+      //GENERAR LETRA-----------------------------------------------------------------
       const genreValue = genreInput.value;
       const jsonData = {
         question: `Necesito una letra original, rimas, con titulo y de al menos 3 versos para una canción del género ${genreValue} con la siguiente idea: ${ideaValue}`,
@@ -48,7 +48,6 @@ function App() {
 
       var myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
-
       var raw = JSON.stringify(jsonData);
 
       var requestOptions = {
@@ -74,9 +73,76 @@ function App() {
         .catch((error) => {
           console.error('Error en la solicitud:', error);
         });
+
+
+      //GENERAR IMAGEN----------------------------------------------------------------------------------
+      const image_jsonData = {
+        question: `Genera una descripcion simple para solicitar una imagen a un ia de un poster de una cancion de ${genreValue} con la siguiente idea: ${ideaValue}`,
+      };
+
+      var raw_image = JSON.stringify(image_jsonData);
+
+      var requestOptions_image = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw_image,
+        redirect: 'follow' as RequestRedirect
+      };
+
+      fetch("http://localhost:3000/chat-gpt-ai/mesagge", requestOptions_image)
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('La solicitud no se pudo completar con éxito.');
+          }
+        })
+        .then((responseJson) => {
+          if (responseJson && responseJson[0] && responseJson[0].text) {
+
+            //SOLICITAR IMAGEN------------------------------------------------------------
+            console.log(responseJson[0].text);
+            const prompt_image = {
+              prompt: responseJson[0].text
+            };
+
+            fetch('http://localhost:3000/stable-diffusion-integration', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(prompt_image), // Envía el prompt en formato JSON
+            })
+              .then((response) => {
+                if (response.ok) {
+                  // La respuesta es un archivo de imagen
+                  return response.blob();
+                } else {
+                  throw new Error('La solicitud de imagen no se pudo completar con éxito.');
+                }
+              })
+              .then((imageBlob) => {
+                // Crear una URL del Blob para la imagen
+                const imageUrl = URL.createObjectURL(imageBlob);
+                setImageUrl(imageUrl);
+              })
+              .catch((error) => {
+                console.error('Error en la solicitud de imagen:', error);
+              });
+
+
+
+          }
+        })
+        .catch((error) => {
+          console.error('Error en la solicitud:', error);
+        });
+
     } else {
       console.error('Campos vacios');
     }
+
+
   };
 
   return (
@@ -169,6 +235,16 @@ function App() {
             </audio>
 
           </div>)}
+
+        {imageUrl && (
+          <div className="mt-4">
+            <label htmlFor="image" className="block text-sm font-medium text-gray-400">
+              Image:
+            </label>
+            <br></br>
+            <img src={imageUrl} alt="Image" />
+          </div>
+        )}
 
 
 
