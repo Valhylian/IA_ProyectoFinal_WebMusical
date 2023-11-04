@@ -4,6 +4,7 @@ function App() {
   const [idea, setIdea] = useState('');
   const [genero, setGenero] = useState('');
   const [melody, setMelody] = useState('');
+  const [melodyUrl, setMelodyUrl] = useState('');
   const [composedSong, setComposedSong] = useState(''); // Estado para mostrar la canción generada
 
   const ideaTextareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -11,49 +12,70 @@ function App() {
   const melodyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const handleStartComposition = () => {
-    if (ideaTextareaRef.current) {
+    const genreInput = document.getElementById('genero') as HTMLInputElement;
+
+    if (ideaTextareaRef.current && melodyTextareaRef.current && genreInput) {
       const ideaValue = ideaTextareaRef.current.value;
-      const genreInput = document.getElementById('genero') as HTMLInputElement;
+      const melodyValue = melodyTextareaRef.current.value;
 
-      if (genreInput) {
-        const genreValue = genreInput.value;
-        const jsonData = {
-          question: `Necesito una letra original, de al menos 3 versos para una canción del género ${genreValue} con la siguiente idea: ${ideaValue}`,
-        };
+      //GENERAR MELODIA
+      fetch(`http://localhost:3000/music/generate?prompt=${genreInput.value} ${melodyValue}`)
+      .then((response) => {
+        if (response.ok) {
+          return response.json(); // Parsea la respuesta JSON
+        } else {
+          throw new Error('La solicitud no se pudo completar con éxito.');
+        }
+      })
+      .then((responseJson) => {
+        // `responseJson` debería contener el enlace al archivo .wav (por ejemplo, `responseJson.melodyUrl`)
+        const melodyUrl = responseJson.melodyUrl;
+        console.log(melodyUrl);
+  
+        // Aquí puedes abrir o reproducir el enlace, como se mencionó anteriormente
+        setMelodyUrl(melodyUrl);
+        window.open(melodyUrl, '_blank'); // Esto abrirá el enlace en una nueva pestaña
+      })
+      .catch((error) => {
+        console.error('Error en la solicitud:', error);
+      });
 
-        var myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
+      //GENERAR LETRA
+      const genreValue = genreInput.value;
+      const jsonData = {
+        question: `Necesito una letra original, rimas, con titulo y de al menos 3 versos para una canción del género ${genreValue} con la siguiente idea: ${ideaValue}`,
+      };
 
-        var raw = JSON.stringify(jsonData);
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
 
-        var requestOptions = {
-          method: 'POST',
-          headers: myHeaders,
-          body: raw,
-          redirect: 'follow' as RequestRedirect
-        };
+      var raw = JSON.stringify(jsonData);
 
-        fetch("http://localhost:3000/chat-gpt-ai/mesagge", requestOptions)
-          .then((response) => {
-            if (response.ok) {
-              return response.json();
-            } else {
-              throw new Error('La solicitud no se pudo completar con éxito.');
-            }
-          })
-          .then((responseJson) => {
-            if (responseJson && responseJson[0] && responseJson[0].text) {
-              setComposedSong(responseJson[0].text); // Establece la canción generada
-            }
-          })
-          .catch((error) => {
-            console.error('Error en la solicitud:', error);
-          });
-      } else {
-        console.error('Elemento "genero" no encontrado en el documento.');
-      }
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow' as RequestRedirect
+      };
+
+      fetch("http://localhost:3000/chat-gpt-ai/mesagge", requestOptions)
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('La solicitud no se pudo completar con éxito.');
+          }
+        })
+        .then((responseJson) => {
+          if (responseJson && responseJson[0] && responseJson[0].text) {
+            setComposedSong(responseJson[0].text); // Establece la canción generada
+          }
+        })
+        .catch((error) => {
+          console.error('Error en la solicitud:', error);
+        });
     } else {
-      console.error('El ref del textarea es nulo.');
+      console.error('Campos vacios');
     }
   };
 
@@ -62,7 +84,7 @@ function App() {
       <div className="bg-gray-800 p-4 w-2/5 rounded-lg">
         <h1 className="text-3xl font-bold text-center my-2">Let's compose!</h1>
 
-       
+
         <div className="mt-4">
           <label htmlFor="genero" className="block text-sm font-medium text-gray-400">
             Genre:
@@ -118,8 +140,8 @@ function App() {
           Compose song
         </button>
 
-         {/* Agrega un campo de texto para mostrar la canción generada */}
-         <div className="mt-4">
+        {/* Agrega un campo de texto para mostrar la canción generada */}
+        <div className="mt-4">
           <label htmlFor="composedSong" className="block text-sm font-medium text-gray-400">
             Composed Song:
           </label>
@@ -132,6 +154,19 @@ function App() {
             readOnly // Hace que el campo sea de solo lectura
           />
         </div>
+
+        <div>
+      {/* Resto de tu JSX */}
+      {melodyUrl && (
+        
+        <audio controls>
+          <source src={melodyUrl} type="audio/wav" />
+          Your browser does not support the audio element.
+        </audio>
+      )}
+    </div>
+
+        
 
       </div>
     </div>

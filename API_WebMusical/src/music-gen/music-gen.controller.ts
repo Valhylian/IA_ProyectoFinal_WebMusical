@@ -1,7 +1,6 @@
 // music.controller.ts
 import { Controller, Get, Query } from '@nestjs/common';
 import Replicate from 'replicate';
-
 @Controller('music')
 export class MusicGenController {
   @Get('generate')
@@ -23,6 +22,8 @@ export class MusicGenController {
         }
       });
 
-    return output; // Puedes personalizar la respuesta según tus necesidades
+    // Devuelve el enlace al archivo .wav como parte de la respuesta JSON
+    return { melodyUrl: output };
   }
 }
+
