@@ -16,7 +16,7 @@ export class MusicGenController {
       {
         input: {
           model_version: "melody",
-          prompt: "Sof and chill melody" // Proporciona tu descripción aquí
+          prompt: "Soft drums" // Proporciona tu descripción aquí
         }
       });
 
